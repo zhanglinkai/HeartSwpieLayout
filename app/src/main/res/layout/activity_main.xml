@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="swipe.heart.com.myheartswipe.MainActivity"
+    android:orientation="vertical">
+
+    <swipe.heart.com.myheartswipe.HeartSwipeLayout
+        android:id="@+id/lay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:id="@+id/test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="xxx"
+            android:gravity="center"
+            android:padding="100dp"
+            android:background="#123456"
+            android:visibility="visible"/>
+        <LinearLayout
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/test2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="deleted"
+                android:gravity="center"
+                android:background="#987654"/>
+            <TextView
+                android:id="@+id/test3"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:text="xxxxx"
+                android:gravity="center"
+                android:background="#658923"/>
+
+        </LinearLayout>
+
+
+    </swipe.heart.com.myheartswipe.HeartSwipeLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="left"
+            android:gravity="center"
+            android:padding="10dp"/>
+        <TextView
+            android:id="@+id/top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="top"
+            android:gravity="center"
+            android:padding="10dp"/>
+        <TextView
+            android:id="@+id/right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="right"
+            android:gravity="center"
+            android:padding="10dp"/>
+        <TextView
+            android:id="@+id/bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="bottom"
+            android:gravity="center"
+            android:padding="10dp"/>
+
+
+    </LinearLayout>
+
+</LinearLayout>
