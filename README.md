@@ -22,8 +22,9 @@
     }
     
     dependencies {
-	        implementation 'com.github.zhanglinkai:HeartVideo:v1.0.1'
-	  }
+	        implementation 'com.github.zhanglinkai:HeartSwpieLayout:1.0'
+	}
+	  
     
 # 说明
           
