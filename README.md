@@ -21,9 +21,10 @@
         }
     }
     
-    dependencies {
-	        implementation 'com.github.zhanglinkai:HeartSwpieLayout:1.0'
+   	dependencies {
+	        implementation 'com.github.zhanglinkai:HeartSwpieLayout:1.1'
 	}
+
 	  
     
 # 说明
