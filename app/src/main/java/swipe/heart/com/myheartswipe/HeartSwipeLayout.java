@@ -2,13 +2,14 @@ package swipe.heart.com.myheartswipe;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
+
+import swipe.heart.com.myheartswipe.HeartSwipeManager;
 
 /**
  * Created by Administrator on 2018/8/27.
@@ -28,13 +29,17 @@ public class HeartSwipeLayout extends LinearLayout {
      */
     private int mode;
     /**
-    * 当前滑动的状态，标记向左-向右-向上-向下
-    * */
+     * 当前滑动的状态，标记向左-向右-向上-向下
+     */
     private int scrollStatus;
     /**
-    * 滑动callback
-    * */
+     * 滑动callback
+     */
     private ViewDragHelper mDragHelper;
+    /**
+     * listener
+     */
+    private HeartSwipeLayoutListener listener;
 
     public HeartSwipeLayout(Context context) {
         this(context, null);
@@ -61,44 +66,71 @@ public class HeartSwipeLayout extends LinearLayout {
         }
     }
 
+    public void setListener(HeartSwipeLayoutListener listener) {
+        this.listener = listener;
+    }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        switch (mode){
+        switch (mode) {
             case Mode.LEFT:
                 contentView.layout(contentView.getLeft(), contentView.getTop(), contentView.getLeft() + contentView.getMeasuredWidth(), contentView.getMeasuredHeight());
                 menuView.layout(contentView.getMeasuredWidth() + contentView.getLeft(), contentView.getTop(), contentView.getMeasuredWidth() + contentView.getLeft() + menuView.getMeasuredWidth(), contentView.getMeasuredHeight());
                 break;
             case Mode.TOP:
                 contentView.layout(contentView.getLeft(), contentView.getTop(), contentView.getLeft() + contentView.getMeasuredWidth(), contentView.getMeasuredHeight());
-                menuView.layout(contentView.getLeft(), contentView.getBottom(), contentView.getMeasuredWidth(), contentView.getBottom()+menuView.getMeasuredHeight());
+                menuView.layout(contentView.getLeft(), contentView.getBottom(), contentView.getMeasuredWidth(), contentView.getBottom() + menuView.getMeasuredHeight());
                 break;
             case Mode.RIGHT:
                 contentView.layout(contentView.getLeft(), contentView.getTop(), contentView.getLeft() + contentView.getMeasuredWidth(), contentView.getMeasuredHeight());
-                menuView.layout(contentView.getLeft()-menuView.getMeasuredWidth(), contentView.getTop(), contentView.getLeft(), contentView.getMeasuredHeight());
+                menuView.layout(contentView.getLeft() - menuView.getMeasuredWidth(), contentView.getTop(), contentView.getLeft(), contentView.getMeasuredHeight());
                 break;
             case Mode.BOTTOM:
                 contentView.layout(contentView.getLeft(), contentView.getTop(), contentView.getLeft() + contentView.getMeasuredWidth(), contentView.getMeasuredHeight());
-                menuView.layout(contentView.getLeft(), contentView.getTop()-menuView.getMeasuredHeight(), contentView.getMeasuredWidth(), menuView.getMeasuredHeight());
+                menuView.layout(contentView.getLeft(), contentView.getTop() - menuView.getMeasuredHeight(), contentView.getMeasuredWidth(), menuView.getMeasuredHeight());
                 break;
         }
     }
 
+    float xDistance, yDistance, xStart, yStart, xEnd, yEnd;
+    boolean isccc;
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        //固定写法
-        int action = MotionEventCompat.getActionMasked(ev);
-        if (action == MotionEvent.ACTION_CANCEL
-                || action == MotionEvent.ACTION_UP) {
-            mDragHelper.cancel();
-            return false;
+
+        switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                isccc = false;
+                xStart = ev.getX();
+                yStart = ev.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                int dX = (int) (ev.getX() - xStart);
+                int dY = (int) (ev.getY() - yStart);
+                if (mode==Mode.LEFT||mode==Mode.RIGHT) {
+                    if (Math.abs(dX) < Math.abs(dY)) {//上下滑动
+                        HeartSwipeManager.newInstance().closeLayout();
+                        return true;
+                    }
+                }else if (mode==Mode.TOP||mode==Mode.BOTTOM){
+                    if (Math.abs(dX) > Math.abs(dY)) {//左右滑动滑动
+                        HeartSwipeManager.newInstance().closeLayout();
+                        return true;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mDragHelper.cancel();
+                return false;
         }
         return mDragHelper.shouldInterceptTouchEvent(ev);
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent ev) {
         //固定写法
-        mDragHelper.processTouchEvent(event);
+        mDragHelper.processTouchEvent(ev);
         return true;
     }
 
@@ -120,9 +152,9 @@ public class HeartSwipeLayout extends LinearLayout {
          */
         @Override
         public int clampViewPositionHorizontal(View child, int left, int dx) {
-            if (mode==Mode.RIGHT||mode==Mode.LEFT){
+            if (mode == Mode.RIGHT || mode == Mode.LEFT) {
                 return left;
-            }else{
+            } else {
                 return 0;
             }
         }
@@ -135,9 +167,9 @@ public class HeartSwipeLayout extends LinearLayout {
          */
         @Override
         public int clampViewPositionVertical(View child, int top, int dy) {
-            if (mode==Mode.RIGHT||mode==Mode.LEFT){
+            if (mode == Mode.RIGHT || mode == Mode.LEFT) {
                 return 0;
-            }else{
+            } else {
                 return top;
             }
         }
@@ -174,36 +206,36 @@ public class HeartSwipeLayout extends LinearLayout {
         * */
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            switch (mode){
+            switch (mode) {
                 case Mode.LEFT:
-                    int scrollLeftStatus=getScrollStatus();
-                    if (scrollLeftStatus==ScrollStatus.LEFT){
+                    int scrollLeftStatus = getScrollStatus();
+                    if (scrollLeftStatus == ScrollStatus.LEFT) {
                         open();
-                    }else if (scrollLeftStatus==ScrollStatus.RIGHT){
+                    } else if (scrollLeftStatus == ScrollStatus.RIGHT) {
                         close();
                     }
                     break;
                 case Mode.RIGHT:
-                    int scrollRightStatus=getScrollStatus();
-                    if (scrollRightStatus==ScrollStatus.LEFT){
-                       close();
-                    }else if (scrollRightStatus==ScrollStatus.RIGHT){
+                    int scrollRightStatus = getScrollStatus();
+                    if (scrollRightStatus == ScrollStatus.LEFT) {
+                        close();
+                    } else if (scrollRightStatus == ScrollStatus.RIGHT) {
                         open();
                     }
                     break;
                 case Mode.TOP:
-                    int scrollTopStatus=getScrollStatus();
-                    if (scrollTopStatus==ScrollStatus.TOP){
+                    int scrollTopStatus = getScrollStatus();
+                    if (scrollTopStatus == ScrollStatus.TOP) {
                         open();
-                    }else if (scrollTopStatus==ScrollStatus.BOTTOM){
+                    } else if (scrollTopStatus == ScrollStatus.BOTTOM) {
                         close();
                     }
                     break;
                 case Mode.BOTTOM:
-                    int scrollBottomStatus=getScrollStatus();
-                    if (scrollBottomStatus==ScrollStatus.TOP){
+                    int scrollBottomStatus = getScrollStatus();
+                    if (scrollBottomStatus == ScrollStatus.TOP) {
                         close();
-                    }else if (scrollBottomStatus==ScrollStatus.BOTTOM){
+                    } else if (scrollBottomStatus == ScrollStatus.BOTTOM) {
                         open();
                     }
                     break;
@@ -215,11 +247,11 @@ public class HeartSwipeLayout extends LinearLayout {
         * */
         @Override
         public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-            switch (mode){
+            switch (mode) {
                 case Mode.LEFT:
-                    if (dx>0){
+                    if (dx > 0) {
                         setScrollStatus(ScrollStatus.RIGHT);
-                    }else{
+                    } else {
                         setScrollStatus(ScrollStatus.LEFT);
                     }
                     if (contentView == changedView) {
@@ -229,9 +261,9 @@ public class HeartSwipeLayout extends LinearLayout {
                     }
                     break;
                 case Mode.RIGHT:
-                    if (dx>0){
+                    if (dx > 0) {
                         setScrollStatus(ScrollStatus.RIGHT);
-                    }else{
+                    } else {
                         setScrollStatus(ScrollStatus.LEFT);
                     }
                     if (contentView == changedView) {
@@ -241,9 +273,9 @@ public class HeartSwipeLayout extends LinearLayout {
                     }
                     break;
                 case Mode.BOTTOM:
-                    if (dy>0){
+                    if (dy > 0) {
                         setScrollStatus(ScrollStatus.BOTTOM);
-                    }else{
+                    } else {
                         setScrollStatus(ScrollStatus.TOP);
                     }
                     if (contentView == changedView) {
@@ -253,9 +285,9 @@ public class HeartSwipeLayout extends LinearLayout {
                     }
                     break;
                 case Mode.TOP:
-                    if (dy>0){
+                    if (dy > 0) {
                         setScrollStatus(ScrollStatus.BOTTOM);
-                    }else{
+                    } else {
                         setScrollStatus(ScrollStatus.TOP);
                     }
                     if (contentView == changedView) {
@@ -292,6 +324,8 @@ public class HeartSwipeLayout extends LinearLayout {
      */
     public void close() {
         if (mDragHelper.smoothSlideViewTo(contentView, 0, 0)) {
+            HeartSwipeManager.newInstance().setLayout(null);
+            listener.onClose(this);
             ViewCompat.postInvalidateOnAnimation(this);
         }
     }
@@ -300,24 +334,36 @@ public class HeartSwipeLayout extends LinearLayout {
      * slide open
      */
     public void open() {
-        switch (mode){
+        switch (mode) {
             case Mode.LEFT:
                 if (mDragHelper.smoothSlideViewTo(contentView, -menuView.getMeasuredWidth(), 0)) {
+                    HeartSwipeManager.newInstance().closeLayout();
+                    HeartSwipeManager.newInstance().setLayout(this);
+                    listener.onOpen(this);
                     ViewCompat.postInvalidateOnAnimation(this);
                 }
                 break;
             case Mode.RIGHT:
                 if (mDragHelper.smoothSlideViewTo(contentView, menuView.getMeasuredWidth(), 0)) {
+                    HeartSwipeManager.newInstance().closeLayout();
+                    HeartSwipeManager.newInstance().setLayout(this);
+                    listener.onOpen(this);
                     ViewCompat.postInvalidateOnAnimation(this);
                 }
                 break;
             case Mode.TOP:
                 if (mDragHelper.smoothSlideViewTo(contentView, 0, -menuView.getMeasuredHeight())) {
+                    HeartSwipeManager.newInstance().closeLayout();
+                    HeartSwipeManager.newInstance().setLayout(this);
+                    listener.onOpen(this);
                     ViewCompat.postInvalidateOnAnimation(this);
                 }
                 break;
             case Mode.BOTTOM:
                 if (mDragHelper.smoothSlideViewTo(contentView, 0, menuView.getMeasuredHeight())) {
+                    HeartSwipeManager.newInstance().closeLayout();
+                    HeartSwipeManager.newInstance().setLayout(this);
+                    listener.onOpen(this);
                     ViewCompat.postInvalidateOnAnimation(this);
                 }
                 break;
@@ -330,7 +376,7 @@ public class HeartSwipeLayout extends LinearLayout {
     * */
     public void setSwipeMode(@Mode int mode) {
         this.mode = mode;
-        switch (mode){
+        switch (mode) {
             case Mode.LEFT:
                 mDragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_LEFT);
                 break;
@@ -356,6 +402,7 @@ public class HeartSwipeLayout extends LinearLayout {
         int RIGHT = 3;
         int BOTTOM = 4;
     }
+
     /*
     * 滑动状态
     * 左-上-右-下
@@ -367,11 +414,47 @@ public class HeartSwipeLayout extends LinearLayout {
         int BOTTOM = 8;
     }
 
-    public int getScrollStatus() {
+    private int getScrollStatus() {
         return scrollStatus;
     }
 
-    public void setScrollStatus(@ScrollStatus int scrollStatus) {
+    private void setScrollStatus(@ScrollStatus int scrollStatus) {
         this.scrollStatus = scrollStatus;
+    }
+
+    /*static class HeartSwipeManager{
+        private static HeartSwipeManager manager;
+        private HeartSwipeLayout layout;
+        public static HeartSwipeManager newInstance() {
+            if (manager==null){
+                manager=new HeartSwipeManager();
+            }
+            return manager;
+        }
+        public void setLayout(HeartSwipeLayout layout) {
+            this.layout = layout;
+        }
+        public void closeLayout(){
+            if (layout!=null){
+                layout.close();
+            }
+        }
+    }*/
+
+    /*
+        * 事件监听
+        * */
+    public interface HeartSwipeLayoutListener {
+        //public void onStartOpen(HeartSwipeLayout layout);
+
+        public void onOpen(HeartSwipeLayout layout);
+
+        //public void onStartClose(HeartSwipeLayout layout);
+
+        public void onClose(HeartSwipeLayout layout);
+
+        /*public void onUpdate(HeartSwipeLayout layout, int leftOffset, int topOffset);
+
+        public void onHandRelease(HeartSwipeLayout layout, float xvel, float yvel);*/
     }
 }
